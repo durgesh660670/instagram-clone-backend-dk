@@ -13,5 +13,5 @@ const generateRefreshToken = (user) => {
     "kumardurgesh123",
   );
 };
-7
+
 module.exports = { generateAccessToken, generateRefreshToken };

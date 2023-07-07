@@ -9,6 +9,16 @@ const signup = async (req, res) => {
     const { username, password, email } = data;
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
+
+    // Check if user with same username or email already exists
+    const existingUser = await User.findOne({ $or: [{ username }, { email }] });
+    if (existingUser) {
+      return res.status(409).json({
+        status: 'unsuccess',
+        message: 'User with the same username or email already exists',
+      });
+    }
+
     const createduser = new User({
       username: username,
       password: hashedPassword,
@@ -17,14 +27,14 @@ const signup = async (req, res) => {
     const saveuser = await createduser.save();
     res.status(200).send({
       status: "success",
-      message: "user saved successfully",
+      message: "User has been successfully Registered!",
       data: {
         user: username,
       },
     });
   } catch (e) {
     res.status(500).send({
-      status: "failure",
+      status: "unsuccess",
       message: e.message,
     });
   }
@@ -35,14 +45,14 @@ const login = async (req, res) => {
     const user = await User.findOne({ username: username });
     if (!user) {
       return res.status(401).send({
-        status: "failure",
+        status: "unsuccess",
         message: "user does not exist",
       });
     }
     const match = await bcrypt.compare(password, user.password);
     if (!match) {
       return res.status(401).send({
-        status: "failure",
+        status: "unsuccess",
         message: "password is incorrect",
       });
     }
@@ -51,7 +61,7 @@ const login = async (req, res) => {
     await User.findByIdAndUpdate(user._id, {
       jwtToken: refreshToken,
     });
-    const { jwtToken, password: newpass, ...other } = user._doc;
+    const { ...other } = user._doc;
     res.status(200).send({
       status: "success",
       message: "logged in successfully",
@@ -61,7 +71,7 @@ const login = async (req, res) => {
     });
   } catch (e) {
     res.status(500).send({
-      status: "failure",
+      status: "unsuccess",
       message: e.message,
     });
   }
@@ -69,23 +79,25 @@ const login = async (req, res) => {
 const logout = async (req, res) => {
   try {
     const { refreshToken } = req.body;
-    if (refreshToken) {
-      await User.updateOne({ jwtToken: refreshToken }, [
-        { $unset: ["jwtToken"] },
-      ]);
-      res.status(200).send({
-        status: "success",
-        message: "You've been logged out",
-      });
-    } else {
+    if (!refreshToken) {
       return res.status(400).send({
-        status: "failure",
+        status: "unsuccess",
         message: "logout error",
       });
     }
+    
+    await User.updateOne({ jwtToken: refreshToken }, [
+      {  $set: { jwtToken: null } },
+    ]);
+    res.status(200).send({
+      status: "success",
+      message: "You've been logged out",
+    });
+
+
   } catch (e) {
     res.status(500).send({
-      status: "failure",
+      status: "unsuccess",
       message: e.message,
     });
   }
@@ -109,7 +121,7 @@ const verify = async (req, res, next) => {
     }
   } catch (e) {
     res.status(500).send({
-      status: "failure",
+      status: "unsuccess",
       message: e.message,
     });
   }
@@ -118,7 +130,7 @@ const refresh = async (req, res) => {
   const refreshToken = req.body.token;
   if (!refreshToken) {
     res.status(401).send({
-      status: "failure",
+      status: "unsuccess",
       message: "You are not authenticated!",
     });
   }
@@ -129,7 +141,7 @@ const refresh = async (req, res) => {
     );
     if (!token) {
       res.status(200).send({
-        status: "failure",
+        status: "unsuccess",
         message: "Refresh token is not valid!",
       });
     }
@@ -141,7 +153,7 @@ const refresh = async (req, res) => {
           console.log(err)
           throw new Error("token is not valid!");
         }
-        
+
         const newAccessToken = generateToken.generateAccessToken(user);
         const newRefreshToken = generateToken.generateRefreshToken(user);
         await User.updateOne(
@@ -156,7 +168,7 @@ const refresh = async (req, res) => {
     );
   } catch (e) {
     res.status(500).send({
-      status: "failure",
+      status: "unsuccess",
       message: e.message,
     });
   }

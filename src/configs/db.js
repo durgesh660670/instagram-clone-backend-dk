@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
+require('dotenv').config()
 
-const URI = "mongodb://0.0.0.0:27017/instagram";
+const URI = process.env.DB_CONNECTION_URL
 
 const connectDB = async () => {
   try {
