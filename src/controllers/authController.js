@@ -2,6 +2,8 @@ const bcrypt = require("bcrypt");
 const User = require("../Models/userModel");
 const jwt = require("jsonwebtoken");
 const generateToken = require("../utils/generateToken");
+require('dotenv').config()
+
 
 const signup = async (req, res) => {
   try {
@@ -61,7 +63,8 @@ const login = async (req, res) => {
     await User.findByIdAndUpdate(user._id, {
       jwtToken: refreshToken,
     });
-    const { ...other } = user._doc;
+    const { password: PassWord, jwtToken, ...other } = user._doc;
+
     res.status(200).send({
       status: "success",
       message: "logged in successfully",
@@ -85,9 +88,9 @@ const logout = async (req, res) => {
         message: "logout error",
       });
     }
-    
+
     await User.updateOne({ jwtToken: refreshToken }, [
-      {  $set: { jwtToken: null } },
+      { $set: { jwtToken: null } },
     ]);
     res.status(200).send({
       status: "success",
@@ -102,34 +105,11 @@ const logout = async (req, res) => {
     });
   }
 };
-const verify = async (req, res, next) => {
-  const authHeader = req.headers.authorization;
-  if (!authHeader) {
-    res.status(403).json("You are not authorized");
-  }
-  const token = authHeader.split(" ")[1];
-  try {
-    if (authHeader) {
-      jwt.verify(token, "kumardurgesh", (err, user) => {
-        if (err) {
-          console.log(err);
-          throw new Error("token is not valid!");
-        }
-        req.user = user;
-        next();
-      });
-    }
-  } catch (e) {
-    res.status(500).send({
-      status: "unsuccess",
-      message: e.message,
-    });
-  }
-};
+
 const refresh = async (req, res) => {
   const refreshToken = req.body.token;
   if (!refreshToken) {
-    res.status(401).send({
+   return  res.status(401).send({
       status: "unsuccess",
       message: "You are not authenticated!",
     });
@@ -140,18 +120,17 @@ const refresh = async (req, res) => {
       { jwtToken: true }
     );
     if (!token) {
-      res.status(200).send({
+      return res.status(401).send({
         status: "unsuccess",
         message: "Refresh token is not valid!",
       });
     }
     jwt.verify(
       refreshToken,
-      "kumardurgesh123",
+      process.env.JWT_SECRET_REFRESH,
       async (err, user) => {
         if (err) {
-          console.log(err)
-          throw new Error("token is not valid!");
+          return res.status(401).json({ message: 'Invalid refresh token' });
         }
 
         const newAccessToken = generateToken.generateAccessToken(user);
@@ -178,6 +157,5 @@ module.exports = {
   signup,
   login,
   logout,
-  verify,
   refresh,
 };

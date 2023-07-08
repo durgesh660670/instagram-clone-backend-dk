@@ -11,15 +11,15 @@ router.get("/u/:username", userController.getUserByUsername);
 router.get("/:id", userController.getUser);
 router.get("/followings/:username", userController.getFollowings);
 router.get("/followers/:username", userController.getFollowers);
-router.put("/:id", authController.verify, userController.updateUser);
+router.put("/:id", userController.updateUser);
 router.put(
   "/:username/follow",
-  authController.verify,
+
   userController.followUser
 );
 router.put(
   "/:username/unfollow",
-  authController.verify,
+
   userController.unfollowUser
 );
 
