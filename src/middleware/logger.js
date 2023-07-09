@@ -1,14 +1,14 @@
 const winston = require('winston');
 const fs = require('fs');
 const path = require('path');
-const moment = require('moment-timezone'); // npm i moment-timezone
+const moment = require('moment-timezone');
 
 
 
 
 // Create the logs directory if it doesn't exist
 //const logsDir = path.join(__dirname, 'logs');
-const logsDir = path.join(path.dirname(__dirname), 'logs');
+const logsDir = path.join(__dirname, '..', '..', 'logs');
 if (!fs.existsSync(logsDir)) {
   fs.mkdirSync(logsDir);
 }
@@ -41,6 +41,17 @@ const customLogger = winston.createLogger({
   ]
 });
 
+const requestClientIp = winston.createLogger({
+  format: winston.format.combine(
+    winston.format.timestamp(),
+    customFormat
+  ),
+  transports: [
+    // new winston.transports.Console(),
+    new winston.transports.File({ filename: path.join(logsDir, `requestClientIp-${moment.tz("Asia/Kolkata").format("YYYY-MM-DD")}.log`) }) // add Indian time to log file name
+  ]
+});
+
 const requestResponse = winston.createLogger({
   format: winston.format.combine(
     winston.format.timestamp(),
@@ -52,11 +63,23 @@ const requestResponse = winston.createLogger({
   ]
 });
 
-function logger2(req, res, next) {
-  requestResponse.info(`${req.method} ${req.url}`);
+function requestResponseMiddleware(req, res, next) {
+  requestResponse.info("Request - " + `${req.method} ${req.url}`);
+
+  // Capture request payload
+  if (req.body) {
+    requestResponse.info("Request Payload - " + JSON.stringify(req.body));
+  }
 
   res.on('finish', () => {
-    requestResponse.info(`${res.statusCode} ${res.statusMessage}`);
+    requestResponse.info("Response - " + `${res.statusCode} ${res.statusMessage}`);
+
+    // Capture response payload
+    const originalSend = res.send;
+    res.send = function (body) {
+      requestResponse.info("Response Payload - " + JSON.stringify(body));
+      originalSend.call(this, body);
+    };
   });
 
   next();
@@ -65,8 +88,11 @@ function logger2(req, res, next) {
 
 
 
+
 module.exports = {
-  logger,
+  // logger,
   customLogger,
-  logger2
+  requestResponseMiddleware,
+  requestClientIp
+  // requestResponse
 }

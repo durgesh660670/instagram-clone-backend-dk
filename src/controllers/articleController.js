@@ -1,6 +1,7 @@
 const Article = require("../Models/articleModel");
 const User = require("../Models/userModel");
 const Comment = require("../Models/commentModel");
+const {customLogger}=require("../middleware/logger")
 
 const createArticle = async (req, res) => {
   req.body.user = req.user._id;
@@ -12,9 +13,10 @@ const createArticle = async (req, res) => {
       message: "article has been created",
     });
   } catch (e) {
+    customLogger.info("createArticle catch - "+e.stack)
     res.status(500).send({
       status: "failure",
-      message: e.message,
+      message: "Error while creating Article",
     });
   }
 };
@@ -57,9 +59,10 @@ const deleteArticle = async (req, res) => {
       });
     }
   } catch (e) {
+    customLogger.info("deleteArticle catch - "+e.stack)
     res.status(500).send({
       status: "failure",
-      message: e.message,
+      message: "Error while deleting Ariticle",
     });
   }
 };
@@ -95,9 +98,10 @@ const getTimeline = async (req, res) => {
       limit: arr.length,
     });
   } catch (e) {
+    customLogger.info("getTimeline catch - "+e.stack)
     res.status(500).send({
       status: "failure",
-      message: e.message,
+      message: "Error while get timeline",
     });
   }
 };
@@ -107,9 +111,10 @@ const getArticlesUser = async (req, res) => {
     const articles = await Article.find({ user: user._id });
     res.status(200).json(articles);
   } catch (e) {
+    customLogger.info("getArticlesUser catch - "+e.stack)
     res.status(500).send({
       status: "failure",
-      message: e.message,
+      message: "Error while get Articles User",
     });
   }
 };
@@ -120,9 +125,10 @@ const getArticle = async (req, res) => {
     );
     res.status(200).json(article);
   } catch (e) {
+    customLogger.info("getArticle catch - "+e.stack)
     res.status(500).send({
       status: "failure",
-      message: e.message,
+      message: "Error while get Article",
     });
   }
 };
@@ -142,7 +148,8 @@ const likeUnlike = async (req, res) => {
         message: "the article has been disliked",
       });
     }
-  } catch (error) {
+  } catch (e) {
+    customLogger.info("likeUnlike - "+e.stack)
     res.status(500).send({
       status: "failure",
       message: e.message,

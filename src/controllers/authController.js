@@ -2,6 +2,7 @@ const bcrypt = require("bcrypt");
 const User = require("../Models/userModel");
 const jwt = require("jsonwebtoken");
 const generateToken = require("../utils/generateToken");
+const {customLogger}=require("../middleware/logger")
 require('dotenv').config()
 
 
@@ -35,9 +36,10 @@ const signup = async (req, res) => {
       },
     });
   } catch (e) {
+    customLogger.info("signup -"+e.stack)
     res.status(500).send({
       status: "unsuccess",
-      message: e.message,
+      message: "Error while signup",
     });
   }
 };
@@ -73,9 +75,10 @@ const login = async (req, res) => {
       refreshToken,
     });
   } catch (e) {
+    customLogger.info("login -"+e.stack)
     res.status(500).send({
       status: "unsuccess",
-      message: e.message,
+      message: "Error while login",
     });
   }
 };
@@ -99,9 +102,10 @@ const logout = async (req, res) => {
 
 
   } catch (e) {
+    customLogger.info("logout -"+e.stack)
     res.status(500).send({
       status: "unsuccess",
-      message: e.message,
+      message: "Error while logout",
     });
   }
 };
@@ -146,9 +150,10 @@ const refresh = async (req, res) => {
       }
     );
   } catch (e) {
+    customLogger.info("Refresh token -"+e.stack)
     res.status(500).send({
       status: "unsuccess",
-      message: e.message,
+      message: "Error while generating or verifying refresh token",
     });
   }
 };

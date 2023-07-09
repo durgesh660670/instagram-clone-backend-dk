@@ -1,5 +1,6 @@
 const Comment = require("../Models/commentModel");
 const Article = require("../Models/articleModel");
+const {customLogger}=require("../middleware/logger");
 
 const addComment = async (req, res) => {
   try {
@@ -16,9 +17,10 @@ const addComment = async (req, res) => {
       message: "Comment has been created",
     });
   } catch (e) {
+    customLogger.info("addComment catch - "+e.stack)
     res.status(500).send({
       status: "failure",
-      message: e.message,
+      message: "Error while adding comment",
     });
   }
 };
@@ -33,9 +35,10 @@ const getbyPostId = async (req, res) => {
       comments: article.comment,
     });
   } catch (error) {
+    customLogger.info("getbyPostId catch - "+e.stack)
     res.status(500).send({
       status: "failure",
-      message: e.message,
+      message: "Error while get by PostId",
     });
   }
 };

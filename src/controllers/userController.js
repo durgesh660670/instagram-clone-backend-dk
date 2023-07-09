@@ -1,6 +1,6 @@
 const bcrypt = require("bcrypt");
 const User = require("../Models/userModel");
-
+const {customLogger}=require("../middleware/logger")
 // dont work right now
 const deleteUser = async (req, res) => {
   if (req.user.username === req.params.username || req.user.role === "admin") {
@@ -41,6 +41,7 @@ const updateUser = async (req, res) => {
         user: other,
       });
     } catch (e) {
+      customLogger.info("update user -"+e.stack)
       res.status(500).send({
         status: "failure",
         message: "something is wrong !",
@@ -67,9 +68,10 @@ const getUser = async (req, res) => {
       user: otherInfo,
     });
   } catch (e) {
+    customLogger.info("get user -"+e.stack)
     res.status(500).send({
       status: "failure",
-      message: e.message,
+      message: "Error while getting user data",
     });
   }
 };
@@ -87,9 +89,10 @@ const getUserByUsername = async (req, res) => {
       user: otherInfo,
     });
   } catch (e) {
+    customLogger.info("getUserByUsername -"+e.stack)
     res.status(500).send({
       status: "failure",
-      message: e.message,
+      message: "Error while get user by username",
     });
   }
 };
@@ -114,9 +117,10 @@ const getFollowings = async (req, res) => {
       followings: followings,
     });
   } catch (e) {
+    customLogger.info("getFollowings -"+e.stack)
     res.status(500).send({
       status: "failure",
-      message: e.message,
+      message: "Error while getting Followings",
     });
   }
 };
@@ -143,9 +147,10 @@ const getFollowers = async (req, res) => {
       },
     });
   } catch (e) {
+    customLogger.info("getFollowers -"+e.stack)
     res.status(500).send({
       status: "failure",
-      message: e.message,
+      message: "Error while getting Followers data",
     });
   }
 };
@@ -180,9 +185,10 @@ const followUser = async (req, res) => {
       throw new Error("you can't follow yourself");
     }
   } catch (e) {
+    customLogger.info("followUser -"+e.stack)
     res.status(500).send({
       status: "failure",
-      message: e.message,
+      message: "Error while follow User",
     });
   }
 };
@@ -217,9 +223,10 @@ const unfollowUser = async (req, res) => {
       throw new Error("you can't unfollow yourself");
     }
   } catch (e) {
+    customLogger.info("unfollowUser -"+e.stack)
     res.status(500).send({
       status: "failure",
-      message: e.message,
+      message: "Error while unfollow User",
     });
   }
 };
@@ -240,9 +247,10 @@ const searchUsers = async (req, res) => {
       users: users,
     });
   } catch (e) {
+    customLogger.info("searchUsers -"+e.stack)
     res.status(500).send({
       status: "failure",
-      message: e.message,
+      message: "Error while searchUsers ",
     });
   }
 };
