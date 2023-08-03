@@ -6,6 +6,7 @@ const rateLimitMiddleware = require('./middleware/rateLimit');
 const userRoute = require("./routes/userRoute");
 const articleRoute = require("./routes/articleRoute");
 const commentRoute = require("./routes/commentRoute");
+const dashboardRoute = require("./routes/dashboardRoute");
 const {checkAuthentication} = require("./middleware/verifyAuth");
 const {restrictTo} = require("./middleware/verifyAuth");
 const {requestResponseMiddleware}=require("./middleware/logger")
@@ -24,6 +25,7 @@ app.use(checkAuthentication)
 app.use("/api/user", userRoute);
 app.use("/api/article", articleRoute);
 app.use("/api/comment", commentRoute);
+app.use("/api/admin", dashboardRoute);
 app.use("/", (req, res) => {
   res.send(`${req.method} Route ${req.path} not found !`);
 });

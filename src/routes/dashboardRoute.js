@@ -1,7 +1,7 @@
 const router = require("express").Router();
 const commentController = require("../controllers/commentController");
 
-router.post("/", commentController.addComment);
-router.get("/:ArticleId", commentController.getbyPostId);
+
+router.get("/dashboard", commentController.getbyPostId);
 
 module.exports = router;
